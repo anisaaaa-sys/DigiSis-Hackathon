@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * Returnerer et opptjeningsresultat som beskriver utfallet uten å kaste exceptions.
  * Utfall: OPPFYLT | ENGANGSSTONAD_FALLBACK | AVSLAG
  */
-public class OpptjeningsvurdererSeervice {
+public class OpptjeningsvurdererService {
     private static final int ANTALL_MAANEDER_VINDU = 10;
     private static final int KRAV_MANEDER_MED_INNTEKT = 6;
 
