@@ -5,19 +5,19 @@ package no.digisis.hackathon.spor3.domain.model;
  * § 14-6: STIPEND_LANEKASSEN teller ikke som opptjening.
  */
 public enum Inntektstype {
-    ARBEID(true);
+    ARBEID(true),
 
-    SYKEPENGER(true);
+    SYKEPENGER(true),
 
-    FORELDREPENGER(true);
+    FORELDREPENGER(true),
 
-    SVANGERSKAPSPENGER(true);
+    SVANGERSKAPSPENGER(true),
 
-    DAPENGER(true);
+    DAPENGER(true),
 
-    AAP(true);
+    AAP(true),
 
-    PLEIEPENGER(true);
+    PLEIEPENGER(true),
 
     STIPEND_LANEKASSEN(false);
 
