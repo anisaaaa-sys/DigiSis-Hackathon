@@ -18,7 +18,7 @@ public record Penger(int kroner) implements Comparable<Penger> {
         return new Penger(kroner);
     }
 
-    Public Penger min(Penger other) {
+    public Penger min(Penger other) {
         return this.kroner <= other.kroner ? this : other;
     }
 

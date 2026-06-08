@@ -8,7 +8,7 @@ import java.time.YearMonth;
  */
 public record Inntektsregistrering(YearMonth maned, Inntektstype type, int belop) {
     public Inntektsregistrering {
-        if (belop < 0) throw new IllegalArgumentException(Beløp kan ikke være negativt);
+        if (belop < 0) throw new IllegalArgumentException("Beløp kan ikke være negativt");
     }
 
     public boolean erGodkjentForOpptjening() {

@@ -1,6 +1,6 @@
 package no.digisis.hackathon.spor3.domain.service;
 
-import no.digisis.hackathon.spor3.domain.model.Beregningsgrunlag;
+import no.digisis.hackathon.spor3.domain.model.Beregningsgrunnlag;
 import no.digisis.hackathon.spor3.domain.model.Kvoter;
 import no.digisis.hackathon.spor3.domain.model.Soknad;
 import no.digisis.hackathon.spor3.domain.model.Vedtak;
@@ -25,7 +25,7 @@ public class Saksbehandling {
 
     public Saksbehandling() {
         this.opptjeningsvurderer = new OpptjeningsvurdererService();
-        this.grunnlagBeregner = ew BeregningsgrunnlagBeregner();
+        this.grunnlagBeregner = new BeregningsgrunnlagBeregner();
         this.stonadsperiodeOppslag = new StonadsperiodeOppslag();
         this.kvoteFordelingsService = new KvoteFordelingsService();
     }

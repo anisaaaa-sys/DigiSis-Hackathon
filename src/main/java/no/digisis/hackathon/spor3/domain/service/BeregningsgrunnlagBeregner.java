@@ -17,8 +17,8 @@ import java.util.List;
  *  3. Avvikssjekk mot oppgittArsinntekt (hopp over hvis oppgittArsinntekt == 0)
  *  4. Kapp ved 6G
  */
-public calss BeregningsgrunnlagBeregner {
-    private static fiinal double AVVIKSTERSKEL = 0.25;
+public class BeregningsgrunnlagBeregner {
+    private static final double AVVIKSTERSKEL = 0.25;
     private static final int ANTALL_MAAN_SNITT = 3;
 
     public Beregningsgrunnlag beregn(Soknad soknad) {

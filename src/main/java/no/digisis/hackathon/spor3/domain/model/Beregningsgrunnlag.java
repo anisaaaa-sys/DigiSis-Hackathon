@@ -13,7 +13,7 @@ public sealed interface Beregningsgrunnlag
      * Grunnlaget er beregnet og klart - kappet ved 6G.
      */
     record OK(Penger belop) implements Beregningsgrunnlag {
-        return OK {
+        public OK {
             if (belop.erMindreEnn(Penger.av(0)))
                 throw new IllegalArgumentException("Beregeningsgrunnlag kan ikke være negativt");
         }
@@ -23,5 +23,5 @@ public sealed interface Beregningsgrunnlag
      * Avvik mellom 3-måneders snitt og oppgitt årsinntekt overskrider 25% -
      * krever manuell vurdering
      */
-    record ManuellVurderinh(String begrunnelse) implements Beregningsgrunnlag {}
+    record ManuellVurdering(String begrunnelse) implements Beregningsgrunnlag {}
 }
