@@ -5,6 +5,7 @@ import no.digisis.hackathon.spor3.domain.model.Penger;
 import no.digisis.hackathon.spor3.domain.model.Soknad;
 
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ public class OpptjeningsvurdererService {
     private static final int ANTALL_MAANEDER_VINDU = 10;
     private static final int KRAV_MANEDER_MED_INNTEKT = 6;
 
-    public sealed interface Oppteningsresultat
+    public sealed interface Opptjeningsresultat
         permits Opptjeningsresultat.Oppfylt,
             Opptjeningsresultat.EngangsstonadFallback,
             Opptjeningsresultat.Avslag {
@@ -49,10 +50,10 @@ public class OpptjeningsvurdererService {
                 .map(Inntektsregistrering::maned)
                 .collect(Collectors.toSet());
 
-        if (maanederMedGodkjentInntekt.size() < KRAV_MAANEDER_MED_INNTEKT) {
+        if (maanederMedGodkjentInntekt.size() < KRAV_MANEDER_MED_INNTEKT) {
             return new Opptjeningsresultat.EngangsstonadFallback(
                     "Kun %d av %d måneder med godkjent inntekt (krever %d)"
-                            .formatted(maanederMedGodkjentInntekt.size(), ANTALL_MAANEDER_VINDU, KRAV_MAANEDER_MED_INNTEKT)
+                            .formatted(maanederMedGodkjentInntekt.size(), ANTALL_MAANEDER_VINDU, KRAV_MANEDER_MED_INNTEKT)
             );
         }
 
@@ -78,9 +79,12 @@ public class OpptjeningsvurdererService {
 
     private List<YearMonth> vinduMaaneder(YearMonth termindatoMaaned) {
         // Én måned bak termindato (§ 14-6: "månedene FØR termin") og 10 måneder tilbake
-        YearMonth start = termindatoMaaned.minusMonths(ANTALL_MAANEDER_VINDU);
-        return start.datesUntil(termindatoMaaned)
-                .map(YearMonth::from)
-                .collect(java.util.stream.Collectors.toList());
+        List<YearMonth>result = new ArrayList<>();
+        YearMonth current = termindatoMaaned.minusMonths(ANTALL_MAANEDER_VINDU);
+        while (current.isBefore(termindatoMaaned)) {
+            result.add(current);
+            current = current.plusMonths(1);
+        }
+        return result;
     }
 }
