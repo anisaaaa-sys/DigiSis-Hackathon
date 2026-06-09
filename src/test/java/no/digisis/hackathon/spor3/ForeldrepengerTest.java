@@ -121,4 +121,95 @@ class ForeldrepengerTest {
     }
 
     // Regel 3: Beregningsgrunnlag
+
+    @Nested
+    @DisplayName("Regel 3 - Beregningsgrunnlag")
+    class BeregningsgrunnlagTest {
+        private final BeregningsgrunnlagBeregner beregner = new BeregningsgrunnlagBeregner();
+
+        @Test
+        @DisplayName("Grunnlag kappes ved 6G (819 294 kr)")
+        void grunnlag_kappes_ved_6G() {
+            var soknad = lagSoknad("s7", true, "2026-08-15", 1_200_000,
+                    inntekt12Mnd(100_000), 1, "begge", 100);
+            var grunnlag = beregner.beregn(soknad);
+            Assertions.assertInstanceOf(Beregningsgrunnlag.OK.class, grunnlag);
+            Assertions.assertEquals(Penger.SEKS_G, ((Beregningsgrunnlag.OK)  grunnlag).belop());
+        }
+
+        @Test
+        @DisplayName("Avvik > 25% gir manuell vurdering")
+        void avvik_over_25_prosent_gir_manuell_vurdering() {
+            // Oppgitt: 400k, men siste 3 mnd snitt: 66 667 x 12 = 800k -> 100% avvik
+            var historikk = new ArrayList<Inntektsregistrering>();
+            YearMonth base = YearMonth.now().minusMonths(11);
+            for (int i = 0; i < 7; i++) {
+                historikk.add(new Inntektsregistrering(base.plusMonths(i), Inntektstype.ARBEID, 33_333));
+            }
+            YearMonth nylig =  YearMonth.now().minusMonths(4);
+            for (int i = 0; i < 3; i++) {
+                historikk.add(new Inntektsregistrering(nylig.plusMonths(i), Inntektstype.ARBEID, 66_667));
+            }
+            var soknad = lagSoknad("s8", true, "2026-10-01", 400_000,
+                    historikk, 1, "begge", 100);
+            var grunnlag = beregner.beregn(soknad);
+            Assertions.assertInstanceOf(Beregningsgrunnlag.ManuellVurdering.class, grunnlag);
+        }
+
+        @Test
+        @DisplayName("Avvikssjekk hoppes over når oppgittArsinntekt er 0")
+        void null_arsinntekt_hopper_over_avvik() {
+            var soknad = lagSoknad("s9", true, "2026-08-15", 0,
+                    inntekt12Mnd(45_000), 1, "begge", 100);
+            var grunnlag = beregner.beregn(soknad);
+            Assertions.assertInstanceOf(Beregningsgrunnlag.OK.class, grunnlag);
+        }
+    }
+
+    // Regel 4: Stønadsperiode
+
+    @Nested
+    @DisplayName("Regel 4 - Stønadsperiode-oppslag")
+    class StonadsperiodeTest {
+        private final StonadsperiodeOppslag oppslag = new StonadsperiodeOppslag();
+
+        @Test
+        void begge_1barn_100prosent() {
+            assertEquals(49, oppslag.hentTotalUker(Rettsforhold.BEGGE, 1, 100));
+        }
+
+        @Test
+        void begge_1barn_80prosent() {
+            assertEquals(61, oppslag.hentTotalUker(Rettsforhold.BEGGE, 1, 80));
+        }
+
+        @Test
+        void begge_2barn_100prosent() {
+            assertEquals(66, oppslag.hentTotalUker(Rettsforhold.BEGGE, 2, 100));
+        }
+
+        @Test
+        void begge_3barn_100prosent() {
+            assertEquals(95, oppslag.hentTotalUker(Rettsforhold.BEGGE, 3, 100));
+        }
+
+        @Test
+        void kunFar_1barn_100prosent() {
+            assertEquals(40, oppslag.hentTotalUker(Rettsforhold.KUN_FAR, 1, 100));
+        }
+
+        @Test
+        void kunFar_3barn_80prosent() {
+            assertEquals(109, oppslag.hentTotalUker(Rettsforhold.KUN_FAR, 3, 80));
+        }
+
+        @Test
+        @DisplayName("Tre eller flere barn behandles likt (3+ kategori)")
+        void tre_og_fire_barn_gir_samme() {
+            assertEquals(
+                    oppslag.hentTotalUker(Rettsforhold.BEGGE, 3, 100),
+                    oppslag.hentTotalUker(Rettsforhold.BEGGE, 5, 100)
+            );
+        }
+    }
 }
