@@ -23,10 +23,10 @@ public class Application {
                 ? Integer.parseInt(System.getenv("PORT"))
                 : 7070;
 
-        String soknadApiUrl = System.getenv("SOKNAD_API_URL");
-        if (soknadApiUrl == null) {
-            throw new IllegalStateException("Miljøvariabel SOKNAD_API_URL er ikke satt");
-        }
+        String soknadApiUrl = System.getenv("SOKNAD_API_URL") != null
+                ? System.getenv("SOKNAD_API_URL")
+                : "http://localhost:" + port;
+
 
         InMemoryLager lager = new InMemoryLager();
         Saksbehandling saksbehandling = new Saksbehandling();
@@ -44,7 +44,20 @@ public class Application {
         router.registrer(app);
         app.start(port);
 
-        System.out.println("Server kjører på http://localhost:" + port);
-        System.out.println("Henter søknader fra: " + soknadApiUrl);
+        // Selvtest: henter alle søknader fra case-serveren ved oppstart og behandler hver enkelt.
+        // Skriver søknad-ID og vedtak-type til konsollen.
+        try {
+            var soknader = soknadhttpklient.hentSoknader();
+            var soknadMapper = new no.digisis.hackathon.spor3.api.SoknadMapper();
+            System.out.println("\n=== Selvtest: alle søknader ===");
+            for (var req : soknader) {
+                var soknad = soknadMapper.tilDomene(req);
+                var vedtak = saksbehandling.fattVedtak(soknad);
+                System.out.println("%-30s → %s".formatted(soknad.id(), vedtak.getClass().getSimpleName()));
+            }
+            System.out.println("================================\n");
+        } catch (Exception e) {
+            System.out.println("[ADVARSEL] Selvtest feilet: " + e.getMessage());
+        }
     }
 }
