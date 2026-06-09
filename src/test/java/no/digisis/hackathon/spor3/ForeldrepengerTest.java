@@ -289,4 +289,34 @@ class ForeldrepengerTest {
             }
         }
     }
+
+    // Full integrasjonstest
+
+    @Nested
+    @DisplayName("Integrasjon - full kjede")
+    class IntegrasjonTest {
+        private final Saksbehandling saksbehandling = new Saksbehandling();
+
+        @Test
+        @DisplayName("Happy path: alle vilkår oppfylt → Innvilget")
+        void happyPath_gir_innvilget() {
+            LocalDate termin = LocalDate.parse("2026-08-15");
+            var soknad = lagSoknad("happy", true, "2026-08-15", 540_000,
+                    inntekt12MndFraTermin(45_000, termin), 1, "begge", 100);
+            var vedtak = saksbehandling.fattVedtak(soknad);
+            assertInstanceOf(Vedtak.Innvilget.class, vedtak);
+            var innvilget = (Vedtak.Innvilget) vedtak;
+            assertEquals(49, innvilget.totalUker());
+            assertEquals(100, innvilget.dekningsgrad());
+            assertNotNull(innvilget.kvoter());
+        }
+
+        @Test
+        @DisplayName("Ikke-norsk borger → Avslag (ikke Engangsstønad)")
+        void ikkeBorger_gir_avslag() {
+            var soknad = lagSoknad("avslag", false, "2026-08-15", 540_000,
+                    inntekt12Mnd(45_000), 1, "begge", 100);
+            assertInstanceOf(Vedtak.Avslag.class, saksbehandling.fattVedtak(soknad));
+        }
+    }
 }
