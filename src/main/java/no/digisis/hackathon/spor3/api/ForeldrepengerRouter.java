@@ -2,9 +2,9 @@ package no.digisis.hackathon.spor3.api;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import no.digisis.hackathon.spor3.model.Soknad;
-import no.digisis.hackathon.spor3.model.Vedtak;
-import no.digisis.hackathon.spor3.service.Saksbehandling;
+import no.digisis.hackathon.spor3.domain.model.Soknad;
+import no.digisis.hackathon.spor3.domain.model.Vedtak;
+import no.digisis.hackathon.spor3.domain.service.Saksbehandling;
 import no.digisis.hackathon.spor3.infrastructure.InMemoryLager;
 
 import java.util.Map;
@@ -25,9 +25,9 @@ public class ForeldrepengerRouter {
     private final InMemoryLager lager;
     private final Saksbehandling saksbehandling;
     private final SoknadMapper mapper;
-    private final SoknadhttpKlient soknadhttpKlient;
+    private final Soknadhttpklient soknadhttpKlient;
 
-    public ForeldrepengerRouter(InMemoryLager lager, Saksbehandling saksbehandling, SoknadhttpKlient soknadhttpKlient) {
+    public ForeldrepengerRouter(InMemoryLager lager, Saksbehandling saksbehandling, Soknadhttpklient soknadhttpKlient) {
         this.lager = lager;
         this.saksbehandling = saksbehandling;
         this.mapper = new SoknadMapper();
@@ -49,7 +49,7 @@ public class ForeldrepengerRouter {
     private void hentTestSoknader(Context ctx) {
         try {
             ctx.json(soknadhttpKlient.hentSoknader());
-        } catch (SoknadhttpKlient.SoknadHentingFeilet e) {
+        } catch (Soknadhttpklient.SoknadHentingFeilet e) {
             ctx.status(502).json(new Dto.FeilResponse(
                     "EKSTERM_API_FEIL",
                     "Kunne ikke hente søknader: " + e.getMessage()
@@ -61,7 +61,7 @@ public class ForeldrepengerRouter {
         try {
             var req = ctx.bodyAsClass(Dto.SoknadRequest.class);
             Soknad soknad = mapper.tilDomene(req);
-            lager = lagreSoknad(soknad);
+            lager.lagreSoknad(soknad);
             ctx.status(201).json(Map.of("soknadId", soknad.id()));
         } catch (Exception e) {
             ctx.status(400).json(new Dto.FeilResponse("UGYLDIG_SOKNAD", e.getMessage()));
@@ -69,7 +69,7 @@ public class ForeldrepengerRouter {
     }
 
     private void hentSoknad(Context ctx) {
-        Stirng id = ctx.pathParam("id");
+        String id = ctx.pathParam("id");
         lager.hentSoknad(id)
                 .ifPresentOrElse(
                         ctx::json,
