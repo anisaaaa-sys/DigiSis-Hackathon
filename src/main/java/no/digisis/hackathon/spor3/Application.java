@@ -25,7 +25,9 @@ public class Application {
 
         String soknadApiUrl = System.getenv("SOKNAD_API_URL") != null
                 ? System.getenv("SOKNAD_API_URL")
-                : "http://localhost:" + port;
+                : System.getProperty("SOKNAD_API_URL") != null
+                  ? System.getProperty("SOKNAD_API_URL")
+                  : "https://api.digisis.org";
 
 
         InMemoryLager lager = new InMemoryLager();
