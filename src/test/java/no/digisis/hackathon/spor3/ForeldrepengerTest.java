@@ -222,4 +222,71 @@ class ForeldrepengerTest {
             );
         }
     }
+
+    // Regel 5: Kvotefordeling
+
+    @Nested
+    @DisplayName("Regel 5 - Kvotefordeling")
+    class KvoteTest {
+        private final KvoteFordelingsService service = new KvoteFordelingsService();
+
+        @Test
+        @DisplayName("Begge, 1 barn, 100%: sum = 49 uker")
+        void begge_1barn_100prosent() {
+            Kvoter k = service.fordel(Rettsforhold.BEGGE, 1, 100, 49);
+            assertEquals(49, k.totalUker());
+            assertEquals(15, k.morKvote());
+            assertEquals(15, k.farKvote());
+            assertEquals(3, k.forhandskvoteMor());
+            assertEquals(0, k.flerbarnsbonus());
+            assertEquals(16, k.fellesperiode()); // 49 - 15 - 15 - 3 - 0 = 16
+        }
+
+        @Test
+        @DisplayName("Begge, 2 barn, 100%: flerbarnsbonus 17 uker")
+        void begge_2barn_100prosent_flerbarnsbonus() {
+            Kvoter k =  service.fordel(Rettsforhold.BEGGE, 2, 100, 66);
+            assertEquals(17, k.flerbarnsbonus());
+            assertEquals(66, k.totalUker());
+        }
+
+        @Test
+        @DisplayName("Kun mor, 1 barn, 100%: alt til mor, ingen far")
+        void kunMor_ingenFarKvote() {
+            Kvoter k = service.fordel(Rettsforhold.KUN_MOR, 1, 100, 49);
+            assertEquals(0, k.farKvote());
+            assertEquals(0, k.fellesperiode());
+            assertEquals(3, k.forhandskvoteMor());
+            assertEquals(46, k.morKvote()); // 49 - 3 = 46
+        }
+
+        @Test
+        @DisplayName("Kun far, 1 barn, 100%: alt til far, ingen mor/fellesperiode")
+        void kunFar_alt_til_far() {
+            Kvoter k  = service.fordel(Rettsforhold.KUN_FAR, 1, 100, 40);
+            assertEquals(40, k.farKvote());
+            assertEquals(0, k.morKvote());
+            assertEquals(0, k.fellesperiode());
+            assertEquals(0, k.forhandskvoteMor());
+            assertEquals(0, k.flerbarnsbonus());
+        }
+
+        @Test
+        @DisplayName("Kvoter-invariant: sum av alle felter == totalUker")
+        void invariant_alltid_oppfylt() {
+            // Test alle kombinasjoner
+            for (Rettsforhold r : Rettsforhold.values()) {
+                for (int barn : new int[]{1, 2, 3}) {
+                    for (int dekn : new int[]{100, 80}) {
+                        StonadsperiodeOppslag oppslag = new StonadsperiodeOppslag();
+                        int total = oppslag.hentTotalUker(r, barn, dekn);
+                        Kvoter k = service.fordel(r, barn, dekn, total);
+                        // Konstruktøren til Kvoter kaster IllegalStateException om sum != total
+                        assertEquals(total, k.totalUker(),
+                                "Invariant brutt for %s, %d barn, %d%%".formatted(r, barn, dekn));
+                    }
+                }
+            }
+        }
+    }
 }
