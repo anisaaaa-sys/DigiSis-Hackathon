@@ -1,8 +1,7 @@
-package no.digisis.hackathon.spor3.test;
+package no.digisis.hackathon.spor3;
 
 import no.digisis.hackathon.spor3.domain.model.*;
 import no.digisis.hackathon.spor3.domain.service.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,6 +34,16 @@ class ForeldrepengerTest {
         return list;
     }
 
+    private static List<Inntektsregistrering> inntekt12MndFraTermin(int belop, LocalDate termindato) {
+        var list = new ArrayList<Inntektsregistrering>();
+        YearMonth termin = YearMonth.from(termindato);
+        YearMonth base = termin.minusMonths(12);
+        for (int i = 0; i < 12; i++) {
+            list.add(new Inntektsregistrering(base.plusMonths(i), Inntektstype.ARBEID, belop));
+        }
+        return list;
+    }
+
     private static List<Inntektsregistrering> inntektMaaneder(int antall, int belop) {
         var list = new ArrayList<Inntektsregistrering>();
         YearMonth base = YearMonth.now().minusMonths(antall + 1);
@@ -57,7 +66,7 @@ class ForeldrepengerTest {
             var soknad = lagSoknad("s1", false, "2026-08-15", 540000,
                     inntekt12Mnd(45000), 1, "begge", 100);
             var result = service.vurder(soknad);
-            Assertions.assertInstanceOf(OpptjeningsvurdererService.Opptjeningsresultat.Avslag.class, result);
+            assertInstanceOf(OpptjeningsvurdererService.Opptjeningsresultat.Avslag.class, result);
         }
 
         @Test
@@ -66,7 +75,7 @@ class ForeldrepengerTest {
             var soknad = lagSoknad("s2", true, "2026-08-15", 540000,
                     inntektMaaneder(7, 45000), 1, "begge", 100);
             var result = service.vurder(soknad);
-            Assertions.assertInstanceOf(OpptjeningsvurdererService.Opptjeningsresultat.Oppfylt.class, result);
+            assertInstanceOf(OpptjeningsvurdererService.Opptjeningsresultat.Oppfylt.class, result);
         }
 
         @Test
@@ -75,7 +84,7 @@ class ForeldrepengerTest {
             var soknad = lagSoknad("s3", true, "2026-08-15", 400000,
                     inntektMaaneder(3, 40000), 1, "kun-mor", 100);
             var result = service.vurder(soknad);
-            Assertions.assertInstanceOf(OpptjeningsvurdererService.Opptjeningsresultat.EngangsstonadFallback.class, result);
+            assertInstanceOf(OpptjeningsvurdererService.Opptjeningsresultat.EngangsstonadFallback.class, result);
         }
 
         @Test
@@ -89,7 +98,7 @@ class ForeldrepengerTest {
             var soknad = lagSoknad("s4", true, "2026-08-15", 0,
                     historikk, 1, "begge", 100);
             var result = service.vurder(soknad);
-            Assertions.assertInstanceOf(OpptjeningsvurdererService.Opptjeningsresultat.EngangsstonadFallback.class, result);
+            assertInstanceOf(OpptjeningsvurdererService.Opptjeningsresultat.EngangsstonadFallback.class, result);
         }
     }
 
@@ -106,8 +115,8 @@ class ForeldrepengerTest {
             var soknad = lagSoknad("s5", true, "2026-08-15", 400000,
                     inntektMaaneder(3, 40000), 1, "kun-mor", 100);
             var vedtak = saksbehandling.fattVedtak(soknad);
-            Assertions.assertInstanceOf(Vedtak.Engangsstonad.class, vedtak);
-            Assertions.assertEquals(Penger.ENGANGSSTONAD, ((Vedtak.Engangsstonad) vedtak).belop());
+            assertInstanceOf(Vedtak.Engangsstonad.class, vedtak);
+            assertEquals(Penger.ENGANGSSTONAD, ((Vedtak.Engangsstonad) vedtak).belop());
         }
 
         @Test
@@ -116,7 +125,7 @@ class ForeldrepengerTest {
             var soknad = lagSoknad("s6", false, "2026-08-15", 400000,
                     inntektMaaneder(3, 40000), 1, "kun-mor", 100);
             var vedtak = saksbehandling.fattVedtak(soknad);
-            Assertions.assertInstanceOf(Vedtak.Avslag.class, vedtak);
+            assertInstanceOf(Vedtak.Avslag.class, vedtak);
         }
     }
 
@@ -130,11 +139,12 @@ class ForeldrepengerTest {
         @Test
         @DisplayName("Grunnlag kappes ved 6G (819 294 kr)")
         void grunnlag_kappes_ved_6G() {
+            LocalDate termin = LocalDate.parse("2026-08-15");
             var soknad = lagSoknad("s7", true, "2026-08-15", 1_200_000,
-                    inntekt12Mnd(100_000), 1, "begge", 100);
+                    inntekt12MndFraTermin(100_000, termin), 1, "begge", 100);
             var grunnlag = beregner.beregn(soknad);
-            Assertions.assertInstanceOf(Beregningsgrunnlag.OK.class, grunnlag);
-            Assertions.assertEquals(Penger.SEKS_G, ((Beregningsgrunnlag.OK)  grunnlag).belop());
+            assertInstanceOf(Beregningsgrunnlag.OK.class, grunnlag);
+            assertEquals(Penger.SEKS_G, ((Beregningsgrunnlag.OK)  grunnlag).belop());
         }
 
         @Test
@@ -153,7 +163,7 @@ class ForeldrepengerTest {
             var soknad = lagSoknad("s8", true, "2026-10-01", 400_000,
                     historikk, 1, "begge", 100);
             var grunnlag = beregner.beregn(soknad);
-            Assertions.assertInstanceOf(Beregningsgrunnlag.ManuellVurdering.class, grunnlag);
+            assertInstanceOf(Beregningsgrunnlag.ManuellVurdering.class, grunnlag);
         }
 
         @Test
@@ -162,7 +172,7 @@ class ForeldrepengerTest {
             var soknad = lagSoknad("s9", true, "2026-08-15", 0,
                     inntekt12Mnd(45_000), 1, "begge", 100);
             var grunnlag = beregner.beregn(soknad);
-            Assertions.assertInstanceOf(Beregningsgrunnlag.OK.class, grunnlag);
+            assertInstanceOf(Beregningsgrunnlag.OK.class, grunnlag);
         }
     }
 
