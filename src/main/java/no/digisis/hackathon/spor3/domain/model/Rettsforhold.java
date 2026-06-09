@@ -1,9 +1,9 @@
 package no.digisis.hackathon.spor3.domain.model;
 
 public enum Rettsforhold {
-    BEGGE("begge");
+    BEGGE("begge"),
 
-    KUN_MOR("kun-mor");
+    KUN_MOR("kun-mor"),
 
     KUN_FAR("kun-far");
 

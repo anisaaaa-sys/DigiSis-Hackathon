@@ -71,7 +71,6 @@ public final class Dto {
     }
 
     public record KvoterDto(
-            (
             int morKvote,
             int farKvote,
             int fellesperiode,

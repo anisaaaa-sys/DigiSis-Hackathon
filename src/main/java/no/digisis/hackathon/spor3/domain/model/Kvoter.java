@@ -14,13 +14,15 @@ public record Kvoter(
     int fellesperiode,
     int forhandskvoteMor,   // 3 uker før termin (kun ved fødsel, kun når mor har rett)
     int flerbarnsbonus,
-    int totaluker
+    int totalUker
 ) {
     public Kvoter {
         int sum = morKvote + farKvote + fellesperiode + forhandskvoteMor + flerbarnsbonus;
         if (sum != totalUker) {
-            throw new IllegalStateException("Kvotene summerer ikke til totalUker: %d + %d + %d + %d + %d = %d ≠ %d" +
-                    .formatted(morKvote, farKvote, fellesperiode, forhandskvoteMor, flerbarnsbonus, sum, totalUker));
+            throw new IllegalStateException(
+                    "Kvotene summerer ikke til totalUker: %d + %d + %d + %d + %d = %d ≠ %d"
+                    .formatted(morKvote, farKvote, fellesperiode, forhandskvoteMor, flerbarnsbonus, sum, totalUker)
+            );
         }
     }
 }

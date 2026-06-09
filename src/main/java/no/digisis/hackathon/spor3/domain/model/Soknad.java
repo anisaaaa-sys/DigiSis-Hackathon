@@ -22,7 +22,7 @@ public record Soknad(
         int dekningsgrad
 ) {
     public Soknad {
-        if (fnr == null || fnr.length != 11)
+        if (fnr == null || fnr.length() != 11)
             throw new IllegalArgumentException("FNR må ha 11 siffer");
         if (dekningsgrad != 100 && dekningsgrad != 80)
             throw new IllegalArgumentException("Dekningsgrad må være 100 eller 80");

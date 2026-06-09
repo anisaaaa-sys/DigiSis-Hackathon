@@ -28,19 +28,17 @@ public class Application {
             throw new IllegalStateException("Miljøvariabel SOKNAD_API_URL er ikke satt");
         }
 
-        ObjectMapper objectMapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
         InMemoryLager lager = new InMemoryLager();
         Saksbehandling saksbehandling = new Saksbehandling();
         Soknadhttpklient soknadhttpklient = new Soknadhttpklient(soknadApiUrl);
         ForeldrepengerRouter router = new ForeldrepengerRouter(lager, saksbehandling, soknadhttpklient);
 
         Javalin app = Javalin.create(config -> {
-            config.jsonMapper(new JavalinJackson(objectMapper));
-            config.bundledPlugins.enableCors(cors ->
-                    cors.addRule(rule -> rule.anyHost()));
+                    config.jsonMapper(new JavalinJackson().updateMapper(mapper -> {
+                        mapper.registerModule(new JavaTimeModule());
+                        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                    }));
+                    config.bundledPlugins.enableCors(cors -> cors.addRule(rule -> rule.anyHost()));
                 });
 
         router.registrer(app);

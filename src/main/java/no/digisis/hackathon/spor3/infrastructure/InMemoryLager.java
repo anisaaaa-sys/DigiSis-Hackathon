@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashmap;
+import java.util.concurrent.*;
 
 /**
  * Enkel in-memory lagring av søknader og vedtak.
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashmap;
 public class InMemoryLager {
 
     private final Map<String, Soknad> soknader = new ConcurrentHashMap<>();
-    private final Map<String, Vedtak> soknader = new ConcurrentHashMap<>();
+    private final Map<String, Vedtak> vedtak = new ConcurrentHashMap<>();
 
     // Søknader
 
@@ -52,5 +52,9 @@ public class InMemoryLager {
         return vedtak.values().stream()
                 .filter(type::isInstance)
                 .toList();
+    }
+
+    public List<Vedtak> hentAlleVedtak() {
+        return List.copyOf(vedtak.values());
     }
 }
