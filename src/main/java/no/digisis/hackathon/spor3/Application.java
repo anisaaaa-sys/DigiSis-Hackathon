@@ -61,5 +61,6 @@ public class Application {
         } catch (Exception e) {
             System.out.println("[ADVARSEL] Selvtest feilet: " + e.getMessage());
         }
+        System.exit(0);
     }
 }
